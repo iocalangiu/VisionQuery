@@ -1,0 +1,26 @@
+# --- VisionQuery GitIgnore ---
+
+# 1. Ignore all video files (large binaries)
+*.mp4
+*.mov
+*.avi
+*.mkv
+
+# 2. Ignore the contents of the data folder
+# We use '/*' so Git still "sees" the folder but ignores the files inside
+data/raw_data/*
+data/processed_logs/*
+
+# 3. BUT keep the folders themselves (using a .gitkeep trick)
+!data/raw_data/.gitkeep
+!data/processed_logs/.gitkeep
+
+# 4. Python & System Junk
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+env/
+
+# 5. VLM / Model temporary files
+temp_middle_frame.jpg
