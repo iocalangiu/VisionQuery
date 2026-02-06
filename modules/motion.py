@@ -1,4 +1,3 @@
-import cv2
 from torchvision.models.video import r2plus1d_18, R2Plus1D_18_Weights
 
 class MotionAnalyzer:
