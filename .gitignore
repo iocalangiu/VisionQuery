@@ -18,6 +18,9 @@ data/processed_logs/*
 # 4. Python & System Junk
 __pycache__/
 *.pyc
+.pytest_cache/
+.ruff_cache/
+*.py[cod]
 .DS_Store
 .venv/
 env/
@@ -28,3 +31,4 @@ temp_middle_frame.jpg
 # Local test files
 utils/cloud_test.py
 utils/test_frame.png
+
