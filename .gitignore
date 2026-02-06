@@ -24,3 +24,7 @@ env/
 
 # 5. VLM / Model temporary files
 temp_middle_frame.jpg
+
+# Local test files
+utils/cloud_test.py
+utils/test_frame.png

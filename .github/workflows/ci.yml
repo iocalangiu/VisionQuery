@@ -1,0 +1,43 @@
+name: VisionQuery CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          
+      - name: Install dependencies
+        run: |
+          pip install ruff pytest modal lancedb
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Lint with Ruff
+        run: ruff check .
+
+      - name: Run Tests
+        run: pytest tests/
+
+  deploy-to-modal:
+    needs: quality-check  # Only runs if tests pass
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Deploy Modal App
+        uses: modal-labs/action-modal-deploy@v0
+        with:
+          # These secrets must be set in GitHub Settings
+          modal_token_id: ${{ secrets.MODAL_TOKEN_ID }}
+          modal_token_secret: ${{ secrets.MODAL_TOKEN_SECRET }}
