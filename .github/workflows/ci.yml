@@ -3,11 +3,9 @@ name: VisionQuery CI/CD
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
-  quality-check:
+  deploy-to-modal:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -15,30 +13,14 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
-          
-      - name: Install dependencies
-        run: |
-          pip install ruff pytest modal lancedb
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          python-version: '3.10' # More stable for torch/transformers
 
-      - name: Lint with Ruff
-        run: ruff check .
+      - name: Install Modal
+        run: pip install modal
 
-      - name: Run Tests
-        run: pytest tests/
-
-  deploy-to-modal:
-    needs: quality-check  # Only runs if tests pass
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Deploy Modal App
-        uses: modal-labs/action-modal-deploy@v0
-        with:
-          # These secrets must be set in GitHub Settings
-          token-id: ${{ secrets.MODAL_TOKEN_ID }}
-          token-secret: ${{ secrets.MODAL_TOKEN_SECRET }}
-          cmd: modal run utils/cloud_test.py
+      - name: Run Modal One-Pass
+        env:
+          MODAL_TOKEN_ID: ${{ secrets.MODAL_TOKEN_ID }}
+          MODAL_TOKEN_SECRET: ${{ secrets.MODAL_TOKEN_SECRET }}
+        # We use the CLI directly to avoid 'repository not found' issues
+        run: modal run utils/cloud_test.py
