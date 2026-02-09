@@ -5,8 +5,8 @@ from typing import Generator
 from src.schema import VideoSource
 
 def get_video_sources(
-    json_path: Optional[str] = None, 
-    local_dir: Optional[str] = None
+    json_path: str | None = None, 
+    local_dir: str | None = None
 ) -> Generator[VideoSource, None, None]:
     """
     A generator that yields VideoSource objects from 

@@ -7,9 +7,8 @@
 *.mkv
 
 # 2. Ignore the contents of the data folder
-# We use '/*' so Git still "sees" the folder but ignores the files inside
-data/raw_data/*
-data/processed_logs/*
+data/
+videos/
 samples/*.png
 
 # 3. BUT keep the folders themselves (using a .gitkeep trick)
@@ -30,6 +29,6 @@ env/
 temp_middle_frame.jpg
 
 # Local test files
-utils/cloud_test.py
 utils/test_frame.png
+
 
