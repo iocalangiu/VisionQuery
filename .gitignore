@@ -10,6 +10,7 @@
 # We use '/*' so Git still "sees" the folder but ignores the files inside
 data/raw_data/*
 data/processed_logs/*
+samples/
 
 # 3. BUT keep the folders themselves (using a .gitkeep trick)
 !data/raw_data/.gitkeep

@@ -1,5 +1,13 @@
-modal
-lancedb
+#lancedb
 pyarrow
 ruff
+opencv-python-headless
+pydantic
+numpy
+pillow
+modal
 pytest
+transformers==4.40.0
+tokenizers==0.19.1
+timm
+einops
