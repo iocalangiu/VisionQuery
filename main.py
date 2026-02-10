@@ -13,7 +13,7 @@ def run_vision_query():
         # This matches the app name and class name in src/vlm_worker.py
         vlm = modal.Cls.from_name("vision-query-moondream", "MoondreamWorker")()
     except Exception as e:
-        print(f"❌ Actual Error: {e}") # This will tell us if it's a name issue or something else
+        print(f"❌ Actual Error: {e}") 
         return
 
     # 2. Iterate through your samples folder
@@ -35,10 +35,10 @@ def run_vision_query():
         
         print("☁️ Calling Moondream2 on Modal...")
         try:
-            caption = vlm.describe_image.remote(buf.getvalue())
+            caption,  embedding = vlm.describe_image.remote(buf.getvalue())
             print(f"🤖 Moondream says: {caption}\n")
 
-            storage.save_result(str(source.uri), caption)
+            storage.save_result(str(source.uri), caption,  embedding)
             print(f"💾 Successfully indexed in database.\n")
         except Exception as e:
             print(f"❌ Error during VLM inference for {source.uri}: {e}")

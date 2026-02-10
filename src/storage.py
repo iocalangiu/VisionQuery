@@ -1,14 +1,12 @@
 import lancedb
 import pyarrow as pa
 from datetime import datetime
-from sentence_transformers import SentenceTransformer
 
 class VisionStorage:
     def __init__(self, uri: str = "data/vision_db"):
         self.uri = uri
         self.db = lancedb.connect(self.uri)
         self.table_name = "video_metadata"
-        self.encoder = SentenceTransformer('all-MiniLM-L6-v2')
 
     def _get_schema(self):
         """Defines the structure of our data (the 'Contract')"""
@@ -19,8 +17,7 @@ class VisionStorage:
             pa.field("timestamp", pa.string()),
         ])
 
-    def save_result(self, video_uri: str, caption: str):
-        embedding = self.encoder.encode(caption).tolist()
+    def save_result(self, video_uri: str, caption: str, embedding: list):
         
         """Saves a single entry to the database."""
         data = [{

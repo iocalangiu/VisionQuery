@@ -5,6 +5,7 @@ import tempfile
 import numpy as np
 from typing import Optional, List
 from src.schema import VideoSource
+import os
 
 def download_to_temp(url: str) -> str:
     """
@@ -35,8 +36,7 @@ def extract_random_frame(source: VideoSource) -> Optional[np.ndarray]:
         return frame
     finally:
         # Clean up the temp file if it was remote
-        if is_remote and video_path and os.path.exists(video_path):
-            import os
+        if is_remote and video_path and os.path.exists(video_path):            
             os.remove(video_path)
 
 def _get_frame_at_random(path: str) -> Optional[np.ndarray]:
