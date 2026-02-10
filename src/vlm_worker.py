@@ -3,7 +3,6 @@ import io
 
 app = modal.App("vision-query-moondream")
 
-# Using your pinned versions for stability
 vlm_image = (
     modal.Image.debian_slim()
     .pip_install(
@@ -12,7 +11,8 @@ vlm_image = (
         "tokenizers==0.19.1", 
         "pillow", 
         "timm", 
-        "einops"
+        "einops",
+        "sentence-transformers"
     )
 )
 
@@ -21,12 +21,15 @@ class MoondreamWorker:
     @modal.enter()
     def setup(self):
         from transformers import AutoModelForCausalLM, AutoTokenizer
+        from sentence_transformers import SentenceTransformer
         import torch
         
         model_id = "vikhyatk/moondream2"
         revision = "2024-03-06"
         
-        print("⏳ Loading Moondream2 into GPU memory...")
+        print("⏳ Loading Moondream2 and Embedding Model into GPU memory...")
+        
+        # load  vlm 
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
         self.model = AutoModelForCausalLM.from_pretrained(
             model_id, 
@@ -34,6 +37,9 @@ class MoondreamWorker:
             torch_dtype=torch.float16,
             revision=revision
         ).to("cuda")
+
+        # load encoder
+        self.encoder = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
 
     @modal.method()
     def describe_image(self, image_bytes: bytes, prompt: str = "Describe this scene in one sentence."):
@@ -43,7 +49,14 @@ class MoondreamWorker:
         # Moondream specific inference style
         enc_image = self.model.encode_image(img)
         answer = self.model.answer_question(enc_image, prompt, self.tokenizer)
-        return answer
+        
+        embedding = self.encoder.encode(answer).tolist()
+        return answer, embedding
+    
+    @modal.method()
+    def embed_text(self, text: str):
+        # This is exactly what search.py needs
+        return self.encoder.encode(text).tolist()
 
 # --- THE TEST BLOCK ---
 @app.local_entrypoint()
@@ -75,8 +88,9 @@ def main():
     # 3. Trigger the Cloud GPU
     print("☁️ Sending pixels to Modal Cloud GPU...")
     worker = MoondreamWorker()
-    result = worker.describe_image.remote(img_bytes)
+    result, embedding = worker.describe_image.remote(img_bytes)
 
     print("\n--- 🤖 Moondream Result ---")
     print(result)
+    print(f"📏 Vector Length: {len(embedding)} (First few: {embedding[:3]}...)")
     print("---------------------------\n")
