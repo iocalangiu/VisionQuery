@@ -1,5 +1,4 @@
 # tests/test_ingestion.py
-import pytest
 import numpy as np
 from src.schema import VideoSource
 from src.ingestion import extract_random_frame
