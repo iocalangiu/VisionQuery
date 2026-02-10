@@ -1,6 +1,5 @@
 import lancedb
-import pandas as pd
-from sentence_transformers import SentenceTransformer
+import modal
 
 def semantic_search(query: str):
     db = lancedb.connect("data/vision_db")
@@ -9,9 +8,15 @@ def semantic_search(query: str):
     except Exception as e:
         print(f"❌ Actual Error: {e}") 
         return
-    encoder = SentenceTransformer('all-MiniLM-L6-v2')
-    query_vector = encoder.encode(query)
-    results = table.search(query_vector).limit(1).to_pandas()
+    
+    print(f"☁️ Asking Modal to embed: '{query}'...")
+    # Lookup the deployed class by name
+    Worker = modal.Cls.from_name("vision-query-moondream", "MoondreamWorker")
+    worker = Worker()
+
+    query_vector = worker.embed_text.remote(query)
+
+    results = table.search(query_vector).limit(2).to_pandas()
 
     print(f"\n🧠 Semantic Results for: '{query}'")
     print(results[['uri', 'caption']])
