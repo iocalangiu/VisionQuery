@@ -1,4 +1,4 @@
-#lancedb
+lancedb
 pyarrow
 ruff
 opencv-python-headless
@@ -11,3 +11,7 @@ transformers==4.40.0
 tokenizers==0.19.1
 timm
 einops
+sentence-transformers
+opencv-python
+tf-keras
+timm<1.0.0  # Add this specific version constraint
