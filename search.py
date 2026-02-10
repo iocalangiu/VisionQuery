@@ -1,8 +1,23 @@
 import lancedb
 import pandas as pd
+from sentence_transformers import SentenceTransformer
+
+def semantic_search(query: str):
+    db = lancedb.connect("data/vision_db")
+    try:
+        table = db.open_table("video_metadata")
+    except Exception as e:
+        print(f"❌ Actual Error: {e}") 
+        return
+    encoder = SentenceTransformer('all-MiniLM-L6-v2')
+    query_vector = encoder.encode(query)
+    results = table.search(query_vector).limit(1).to_pandas()
+
+    print(f"\n🧠 Semantic Results for: '{query}'")
+    print(results[['uri', 'caption']])
+
 
 def search_videos(query: str):
-    # 1. Connect to the existing database
     db = lancedb.connect("data/vision_db")
     
     # 2. Open the table
@@ -30,5 +45,8 @@ def search_videos(query: str):
         print(f"🤷 No videos found matching '{query}'.")
 
 if __name__ == "__main__":
-    search_term = input("What are you looking for? (e.g., 'city', 'water', 'leaf'): ")
-    search_videos(search_term)
+    #search_term = input("What are you looking for? (e.g., 'city', 'water', 'leaf'): ")
+    #search_videos(search_term)
+
+    term = input("Search by meaning: ")
+    semantic_search(term)
