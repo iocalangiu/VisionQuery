@@ -41,7 +41,7 @@ class MoondreamWorker:
 
     @modal.method()
     def describe_image(
-        self, image_bytes: bytes, prompt: str = "Describe this scene in one sentence."
+        self, image_bytes: bytes, prompt: str = "Describe this scene strictly in the format: Subject, Action, Context. Do not use full sentences."
     ):
         from PIL import Image
 

@@ -1,13 +1,13 @@
 import json
 import os
 from pathlib import Path
-from typing import Generator
-from src.schema import VideoSource
-
+from typing import Generator, List
+from src.schema import MediaSource
+from datasets import load_dataset
 
 def get_video_sources(
     json_path: str | None = None, local_dir: str | None = None
-) -> Generator[VideoSource, None, None]:
+) -> Generator[MediaSource, None, None]:
     """
     A generator that yields VideoSource objects from
     either a JSON metadata file or a local directory.
@@ -23,10 +23,9 @@ def get_video_sources(
             for item in items:
                 video_url = item.get("outputVideo")
                 if video_url:
-                    yield VideoSource(
+                    yield MediaSource(
                         uri=video_url,
-                        prompt=item.get("prompt"),
-                        job_id=item.get("jobId"),
+                        media_type="video",
                         source_type="remote",
                     )
 
@@ -35,12 +34,21 @@ def get_video_sources(
         valid_extensions = {".mp4", ".mov", ".avi", ".mkv"}
         for file_path in Path(local_dir).iterdir():
             if file_path.suffix.lower() in valid_extensions:
-                yield VideoSource(
+                yield MediaSource(
                     uri=file_path,
-                    prompt=None,
-                    job_id=f"local-{file_path.stem}",
+                    media_type="video", # <--- Added this
                     source_type="local",
                 )
+
+def get_cifar_sources(num: int = 10) -> List[MediaSource]:
+    """
+    Creates a list of MediaSource objects pointing to CIFAR-10 indices.
+    """
+    # We don't download the whole thing, just define the pointers
+    return [
+        MediaSource(uri=str(i), media_type="image", source_type="cifar") 
+        for i in range(num)
+    ]
 
 
 # --- Usage Example ---

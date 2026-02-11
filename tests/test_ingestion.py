@@ -1,16 +1,17 @@
 # tests/test_ingestion.py
 import numpy as np
-from src.schema import VideoSource
+from src.schema import MediaSource
 from src.ingestion import extract_random_frame
+from src.data_io import get_cifar_sources
 
 
 def test_extract_random_frame_local():
     """
     Verifies that the ingestion engine can open a local video
     and return a valid numpy image array.
-    """
+    """=
     # 1. SETUP: Use a small sample video in your repo
-    source = VideoSource(uri="samples/test_video.mp4", source_type="local")
+    source = MediaSource(uri="samples/test_video.mp4", media_type="video",source_type="local")
 
     # 2. EXECUTE
     frame = extract_random_frame(source)
@@ -24,6 +25,19 @@ def test_extract_random_frame_local():
 
 def test_extract_invalid_path():
     """Verifies the system handles missing files gracefully."""
-    source = VideoSource(uri="non_existent.mp4", source_type="local")
+    source = MediaSource(uri="non_existent.mp4", media_type="video",source_type="local")
     frame = extract_random_frame(source)
     assert frame is None
+
+def test_cifar_generator_integrity():
+    """Verify that get_cifar_sources produces valid MediaSource objects."""
+    num_to_test = 5
+    sources = get_cifar_sources(num=num_to_test)
+    
+    assert len(sources) == num_to_test
+    for source in sources:
+        # Pydantic validation: this will raise an error if the class changed
+        assert isinstance(source, MediaSource)
+        assert source.media_type == "image"
+        assert source.source_type == "cifar"
+        assert source.uri.isdigit() # CIFAR URIs are indices

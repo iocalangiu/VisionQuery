@@ -1,10 +1,9 @@
 from pydantic import BaseModel, HttpUrl
-from typing import Optional, Union
+from typing import Optional, Union, Literal
 from pathlib import Path
 
 
-class VideoSource(BaseModel):
+class MediaSource(BaseModel):
     uri: Union[HttpUrl, Path, str]
-    prompt: Optional[str] = None
-    job_id: Optional[str] = None
-    source_type: str  # "local" or "remote"
+    media_type: Literal["video", "image"]
+    source_type: Literal["local", "cifar"]

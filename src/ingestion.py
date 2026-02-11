@@ -4,14 +4,25 @@ import requests
 import tempfile
 import numpy as np
 from typing import Optional, List
-from src.schema import VideoSource
+from src.schema import MediaSource
 import os
 
+def get_pixels_from_source(source: MediaSource) -> Optional[np.ndarray]:
+    """
+    The main entry point for ingestion. 
+    Decides whether to extract a frame from a video or load an image directly.
+    """
+    if source.media_type == "video":
+        return extract_random_frame(source)
+    
+    elif source.media_type == "image":
+        return load_image_pixels(source)
+    
+    return None
 
 def download_to_temp(url: str) -> str:
     """
     Downloads a remote video to a temporary file.
-    Essential for 2016 Macs where OpenCV might not support streaming URLs.
     """
     temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp4")
     with requests.get(url, stream=True) as r:
@@ -20,10 +31,29 @@ def download_to_temp(url: str) -> str:
             temp_file.write(chunk)
     return temp_file.name
 
-
-def extract_random_frame(source: VideoSource) -> Optional[np.ndarray]:
+def load_image_pixels(source: MediaSource) -> Optional[np.ndarray]:
     """
-    High-level function to extract one random RGB frame from a VideoSource.
+    Loads pixels from a local path or a CIFAR-style source.
+    """
+    try:
+        if source.source_type == "local":
+            img = Image.open(source.uri).convert("RGB")
+            return np.array(img)
+        
+        elif source.source_type == "cifar":
+            # If you're using the 'datasets' library to pull CIFAR
+            from datasets import load_dataset
+            # Example: uri could be the index of the image in the dataset
+            ds = load_dataset("cifar10", split="train")
+            img = ds[int(source.uri)]['img'].convert("RGB")
+            return np.array(img)
+    except Exception as e:
+        print("❌ Error loading image {source.uri}: {e}")
+        return None
+
+def extract_random_frame(source: MediaSource) -> Optional[np.ndarray]:
+    """
+    High-level function to extract one random RGB frame from a MediaSource.
     """
     video_path = str(source.uri)
     is_remote = source.source_type == "remote"
@@ -71,13 +101,13 @@ def _get_frame_at_random(path: str) -> Optional[np.ndarray]:
 # --- Placeholders for future selection methods ---
 
 
-def extract_kmeans_frames(source: VideoSource, k: int = 5) -> List[np.ndarray]:
+def extract_kmeans_frames(source: MediaSource, k: int = 5) -> List[np.ndarray]:
     """Placeholder: Extract k representative frames using clustering."""
     print("K-Means extraction not yet implemented.")
     return []
 
 
-def extract_scene_changes(source: VideoSource) -> List[np.ndarray]:
+def extract_scene_changes(source: MediaSource) -> List[np.ndarray]:
     """Placeholder: Extract frames where PySceneDetect finds a cut."""
     print("Scene detection not yet implemented.")
     return []

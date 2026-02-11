@@ -1,12 +1,15 @@
 import modal
 from io import BytesIO
 from PIL import Image
-from src.data_io import get_video_sources
-from src.ingestion import extract_random_frame
+from src.data_io import get_video_sources, get_cifar_sources
+from src.ingestion import get_pixels_from_source
 from src.storage import VisionStorage
 
+# --- CONFIGURATION ---
+# Change this to "CIFAR", "LOCAL", or "S3" in future
+MODE = "CIFAR"
 
-def run_vision_query():
+def run_vision_query(limit: int = None):
     storage = VisionStorage()
 
     # 1. Look up the deployed Moondream worker
@@ -14,23 +17,35 @@ def run_vision_query():
         # This matches the app name and class name in src/vlm_worker.py
         vlm = modal.Cls.from_name("vision-query-moondream", "MoondreamWorker")()
     except Exception as e:
-        print(f"❌ Actual Error: {e}")
+        print("❌ Actual Error: {e}")
         return
+    
+    # 1. Strategy Picker (No commenting out!)
+    if MODE == "CIFAR":
+        sources = get_cifar_sources(num=10)
+    elif MODE == "LOCAL":
+        sources = get_video_sources(path="videos/videos_v0")
+    elif MODE == "S3":
+        print("❌ Not implemented yet")
 
-    # 2. Iterate through your samples folder
-    sources = get_video_sources(local_dir="videos/videos_v0")
-
+    count = 0
     for source in sources:
-        print(f"🎬 Processing: {source.uri}")
+        if limit and count >= limit:
+            break
+        print("🎬 Processing: {source.uri}")
 
         # Local Mac extraction
-        frame = extract_random_frame(source)
+        frame = get_pixels_from_source(source)
+        #frame = extract_random_frame(source)
         if frame is None:
-            print(f"⚠️ Skipping {source.uri}: No frame extracted.")
+            print("⚠️ Skipping {source.uri}: No frame extracted.")
             continue
 
         # Convert numpy frame to bytes for transmission
         img = Image.fromarray(frame)
+        if MODE == "CIFAR":
+            # Upscale tiny images so the AI can actually see them!
+            img = img.resize((224, 224), Image.Resampling.LANCZOS)
         buf = BytesIO()
         img.save(buf, format="PNG")  # Moondream likes PNG/JPEG
 
@@ -41,6 +56,7 @@ def run_vision_query():
 
             storage.save_result(str(source.uri), caption, embedding)
             print("💾 Successfully indexed in database.\n")
+            count+=1
         except Exception as e:
             print(f"❌ Error during VLM inference for {source.uri}: {e}")
 

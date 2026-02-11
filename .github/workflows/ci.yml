@@ -48,3 +48,10 @@ jobs:
         env:
           PYTHONPATH: .
         run: pytest tests/test_ingestion.py
+
+      - name: Run Schema Tests
+        run: pytest tests/test_schema_integrity.py
+        
+      - name: Run E2E Mock Test
+        # This runs the test you just passed locally
+        run: pytest tests/tests_e2e.py
