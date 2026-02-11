@@ -3,7 +3,6 @@ import os
 from pathlib import Path
 from typing import Generator, List
 from src.schema import MediaSource
-from datasets import load_dataset
 
 def get_video_sources(
     json_path: str | None = None, local_dir: str | None = None

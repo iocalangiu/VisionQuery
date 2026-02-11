@@ -1,5 +1,5 @@
 from pydantic import BaseModel, HttpUrl
-from typing import Optional, Union, Literal
+from typing import Union, Literal
 from pathlib import Path
 
 

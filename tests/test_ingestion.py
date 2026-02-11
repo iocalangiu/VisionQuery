@@ -9,7 +9,7 @@ def test_extract_random_frame_local():
     """
     Verifies that the ingestion engine can open a local video
     and return a valid numpy image array.
-    """=
+    """
     # 1. SETUP: Use a small sample video in your repo
     source = MediaSource(uri="samples/test_video.mp4", media_type="video",source_type="local")
 

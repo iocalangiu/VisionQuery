@@ -6,6 +6,7 @@ import numpy as np
 from typing import Optional, List
 from src.schema import MediaSource
 import os
+from PIL import Image
 
 def get_pixels_from_source(source: MediaSource) -> Optional[np.ndarray]:
     """
@@ -47,7 +48,7 @@ def load_image_pixels(source: MediaSource) -> Optional[np.ndarray]:
             ds = load_dataset("cifar10", split="train")
             img = ds[int(source.uri)]['img'].convert("RGB")
             return np.array(img)
-    except Exception as e:
+    except Exception:
         print("❌ Error loading image {source.uri}: {e}")
         return None
 

@@ -17,7 +17,7 @@ def run_vision_query(limit: int = None):
         # This matches the app name and class name in src/vlm_worker.py
         vlm = modal.Cls.from_name("vision-query-moondream", "MoondreamWorker")()
     except Exception as e:
-        print("❌ Actual Error: {e}")
+        print(f"❌ Actual Error: {e}")
         return
     
     # 1. Strategy Picker (No commenting out!)
