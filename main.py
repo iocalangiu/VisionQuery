@@ -39,7 +39,7 @@ def run_vision_query():
             print(f"🤖 Moondream says: {caption}\n")
 
             storage.save_result(str(source.uri), caption,  embedding)
-            print(f"💾 Successfully indexed in database.\n")
+            print("💾 Successfully indexed in database.\n")
         except Exception as e:
             print(f"❌ Error during VLM inference for {source.uri}: {e}")
 
