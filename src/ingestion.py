@@ -7,6 +7,7 @@ from typing import Optional, List
 from src.schema import VideoSource
 import os
 
+
 def download_to_temp(url: str) -> str:
     """
     Downloads a remote video to a temporary file.
@@ -19,13 +20,14 @@ def download_to_temp(url: str) -> str:
             temp_file.write(chunk)
     return temp_file.name
 
+
 def extract_random_frame(source: VideoSource) -> Optional[np.ndarray]:
     """
     High-level function to extract one random RGB frame from a VideoSource.
     """
     video_path = str(source.uri)
     is_remote = source.source_type == "remote"
-    
+
     # Logic for remote files
     if is_remote:
         # download locally because OpenCV seek is faster/more stable on disk
@@ -36,8 +38,9 @@ def extract_random_frame(source: VideoSource) -> Optional[np.ndarray]:
         return frame
     finally:
         # Clean up the temp file if it was remote
-        if is_remote and video_path and os.path.exists(video_path):            
+        if is_remote and video_path and os.path.exists(video_path):
             os.remove(video_path)
+
 
 def _get_frame_at_random(path: str) -> Optional[np.ndarray]:
     """
@@ -55,7 +58,7 @@ def _get_frame_at_random(path: str) -> Optional[np.ndarray]:
     # Pick a random point
     random_idx = random.randint(0, total_frames - 1)
     cap.set(cv2.CAP_PROP_POS_FRAMES, random_idx)
-    
+
     success, frame = cap.read()
     cap.release()
 
@@ -64,12 +67,15 @@ def _get_frame_at_random(path: str) -> Optional[np.ndarray]:
         return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     return None
 
+
 # --- Placeholders for future selection methods ---
+
 
 def extract_kmeans_frames(source: VideoSource, k: int = 5) -> List[np.ndarray]:
     """Placeholder: Extract k representative frames using clustering."""
     print("K-Means extraction not yet implemented.")
     return []
+
 
 def extract_scene_changes(source: VideoSource) -> List[np.ndarray]:
     """Placeholder: Extract frames where PySceneDetect finds a cut."""

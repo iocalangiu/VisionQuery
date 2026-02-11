@@ -3,18 +3,16 @@ import io
 
 app = modal.App("vision-query-moondream")
 
-vlm_image = (
-    modal.Image.debian_slim()
-    .pip_install(
-        "torch", 
-        "transformers==4.40.0", 
-        "tokenizers==0.19.1", 
-        "pillow", 
-        "timm", 
-        "einops",
-        "sentence-transformers"
-    )
+vlm_image = modal.Image.debian_slim().pip_install(
+    "torch",
+    "transformers==4.40.0",
+    "tokenizers==0.19.1",
+    "pillow",
+    "timm",
+    "einops",
+    "sentence-transformers",
 )
+
 
 @app.cls(image=vlm_image, gpu="T4")
 class MoondreamWorker:
@@ -23,40 +21,44 @@ class MoondreamWorker:
         from transformers import AutoModelForCausalLM, AutoTokenizer
         from sentence_transformers import SentenceTransformer
         import torch
-        
+
         model_id = "vikhyatk/moondream2"
         revision = "2024-03-06"
-        
+
         print("⏳ Loading Moondream2 and Embedding Model into GPU memory...")
-        
-        # load  vlm 
+
+        # load  vlm
         self.tokenizer = AutoTokenizer.from_pretrained(model_id, revision=revision)
         self.model = AutoModelForCausalLM.from_pretrained(
-            model_id, 
-            trust_remote_code=True, 
+            model_id,
+            trust_remote_code=True,
             torch_dtype=torch.float16,
-            revision=revision
+            revision=revision,
         ).to("cuda")
 
         # load encoder
-        self.encoder = SentenceTransformer('all-MiniLM-L6-v2', device='cuda')
+        self.encoder = SentenceTransformer("all-MiniLM-L6-v2", device="cuda")
 
     @modal.method()
-    def describe_image(self, image_bytes: bytes, prompt: str = "Describe this scene in one sentence."):
+    def describe_image(
+        self, image_bytes: bytes, prompt: str = "Describe this scene in one sentence."
+    ):
         from PIL import Image
+
         img = Image.open(io.BytesIO(image_bytes))
-        
+
         # Moondream specific inference style
         enc_image = self.model.encode_image(img)
         answer = self.model.answer_question(enc_image, prompt, self.tokenizer)
-        
+
         embedding = self.encoder.encode(answer).tolist()
         return answer, embedding
-    
+
     @modal.method()
     def embed_text(self, text: str):
         # This is exactly what search.py needs
         return self.encoder.encode(text).tolist()
+
 
 # --- THE TEST BLOCK ---
 @app.local_entrypoint()
