@@ -7,3 +7,7 @@ Ensure you have Python 3.10+ and the Modal CLI installed.
 ```bash
 pip install -r requirements.txt
 modal auth
+
+### 2. Deploy the VLM Worker
+```bash
+modal deploy src/vlm_worker.py
