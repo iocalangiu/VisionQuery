@@ -8,18 +8,20 @@ from src.schema import MediaSource
 import os
 from PIL import Image
 
+
 def get_pixels_from_source(source: MediaSource) -> Optional[np.ndarray]:
     """
-    The main entry point for ingestion. 
+    The main entry point for ingestion.
     Decides whether to extract a frame from a video or load an image directly.
     """
     if source.media_type == "video":
         return extract_random_frame(source)
-    
+
     elif source.media_type == "image":
         return load_image_pixels(source)
-    
+
     return None
+
 
 def download_to_temp(url: str) -> str:
     """
@@ -32,6 +34,7 @@ def download_to_temp(url: str) -> str:
             temp_file.write(chunk)
     return temp_file.name
 
+
 def load_image_pixels(source: MediaSource) -> Optional[np.ndarray]:
     """
     Loads pixels from a local path or a CIFAR-style source.
@@ -40,17 +43,19 @@ def load_image_pixels(source: MediaSource) -> Optional[np.ndarray]:
         if source.source_type == "local":
             img = Image.open(source.uri).convert("RGB")
             return np.array(img)
-        
+
         elif source.source_type == "cifar":
             # If you're using the 'datasets' library to pull CIFAR
             from datasets import load_dataset
+
             # Example: uri could be the index of the image in the dataset
             ds = load_dataset("cifar10", split="train")
-            img = ds[int(source.uri)]['img'].convert("RGB")
+            img = ds[int(source.uri)]["img"].convert("RGB")
             return np.array(img)
     except Exception:
         print("❌ Error loading image {source.uri}: {e}")
         return None
+
 
 def extract_random_frame(source: MediaSource) -> Optional[np.ndarray]:
     """

@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock, patch
 from main import run_vision_query
 
+
 @patch("modal.Cls.from_name")
 def test_pipeline_execution(mock_modal_cls):
     """
@@ -15,8 +16,8 @@ def test_pipeline_execution(mock_modal_cls):
 
     # 2. Run the query logic (maybe point to a 'test_data' folder)
     try:
-        # You might want to modify run_vision_query to accept a 'limit' 
+        # You might want to modify run_vision_query to accept a 'limit'
         # so it only processes 1 item for the test.
-        run_vision_query(limit=1) 
+        run_vision_query(limit=1)
     except Exception as e:
         pytest.fail(f"Pipeline crashed with error: {e}")

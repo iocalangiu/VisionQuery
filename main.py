@@ -9,6 +9,7 @@ from src.storage import VisionStorage
 # Change this to "CIFAR", "LOCAL", or "S3" in future
 MODE = "CIFAR"
 
+
 def run_vision_query(limit: int = None):
     storage = VisionStorage()
 
@@ -19,7 +20,7 @@ def run_vision_query(limit: int = None):
     except Exception as e:
         print(f"❌ Actual Error: {e}")
         return
-    
+
     # 1. Strategy Picker (No commenting out!)
     if MODE == "CIFAR":
         sources = get_cifar_sources(num=10)
@@ -36,7 +37,7 @@ def run_vision_query(limit: int = None):
 
         # Local Mac extraction
         frame = get_pixels_from_source(source)
-        #frame = extract_random_frame(source)
+        # frame = extract_random_frame(source)
         if frame is None:
             print("⚠️ Skipping {source.uri}: No frame extracted.")
             continue
@@ -56,7 +57,7 @@ def run_vision_query(limit: int = None):
 
             storage.save_result(str(source.uri), caption, embedding)
             print("💾 Successfully indexed in database.\n")
-            count+=1
+            count += 1
         except Exception as e:
             print(f"❌ Error during VLM inference for {source.uri}: {e}")
 

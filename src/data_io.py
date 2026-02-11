@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Generator, List
 from src.schema import MediaSource
 
+
 def get_video_sources(
     json_path: str | None = None, local_dir: str | None = None
 ) -> Generator[MediaSource, None, None]:
@@ -35,9 +36,10 @@ def get_video_sources(
             if file_path.suffix.lower() in valid_extensions:
                 yield MediaSource(
                     uri=file_path,
-                    media_type="video", # <--- Added this
+                    media_type="video",  # <--- Added this
                     source_type="local",
                 )
+
 
 def get_cifar_sources(num: int = 10) -> List[MediaSource]:
     """
@@ -45,7 +47,7 @@ def get_cifar_sources(num: int = 10) -> List[MediaSource]:
     """
     # We don't download the whole thing, just define the pointers
     return [
-        MediaSource(uri=str(i), media_type="image", source_type="cifar") 
+        MediaSource(uri=str(i), media_type="image", source_type="cifar")
         for i in range(num)
     ]
 
