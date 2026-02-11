@@ -33,4 +33,4 @@ python search.py --query "a blue truck"
 
 [ ] Visual Interface: A web-based UI to browse and filter indexed frames visually.
 
-[ ] LoRA Fine-tuning: Implementing Low-Rank Adaptation to enforce specific captioning styles for niche domains (e.g., medical, specific anime styles, or security).
+[ ] LoRA Fine-tuning: Implementing Low-Rank Adaptation to enforce specific captioning styles for niche domains.
