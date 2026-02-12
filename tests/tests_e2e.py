@@ -4,15 +4,16 @@ import shutil
 from main import run_vision_query
 from pathlib import Path
 
+
 @pytest.fixture
 def setup_local_data():
     """Sets up a temporary video directory and cleans it up after the test."""
     test_dir = Path("videos/videos_v0")
     test_dir.mkdir(parents=True, exist_ok=True)
     (test_dir / "test.mp4").touch()
-    
+
     yield test_dir  # The test runs while it's "paused" here
-    
+
     # Teardown: Remove the directory and the fake file
     if test_dir.exists():
         shutil.rmtree(test_dir)
