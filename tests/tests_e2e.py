@@ -2,7 +2,6 @@ import pytest
 from unittest.mock import MagicMock, patch
 import shutil
 from main import run_vision_query
-import os
 from pathlib import Path
 
 @pytest.fixture
@@ -30,7 +29,7 @@ def test_pipeline_execution(mock_modal_cls, mode, setup_local_data):
     mock_worker = MagicMock()
     mock_worker.describe_image.remote.return_value = ("A test image", [0.1] * 384)
     mock_modal_cls.return_value = lambda: mock_worker
-    
+
     # 2. Run the query logic (maybe point to a 'test_data' folder)
     try:
         # You might want to modify run_vision_query to accept a 'limit'
