@@ -1,18 +1,18 @@
+# --- Core Frameworks ---
+modal
+pydantic
 lancedb
 pyarrow
-ruff
-opencv-python-headless
-pydantic
-numpy
+
+# --- Image/Video Processing ---
 pillow
-modal
+numpy
+opencv-python  # Use the standard version for your Mac/GUI
+
+# --- Data Ingestion ---
+datasets  # To load CIFAR-10
+
+# --- Testing & Quality ---
 pytest
-transformers==4.40.0
-tokenizers==0.19.1
-timm
-einops
-sentence-transformers
-opencv-python
-tf-keras
-timm<1.0.0  # Add this specific version constraint
 pytest-regressions
+ruff

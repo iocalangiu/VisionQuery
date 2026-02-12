@@ -9,6 +9,10 @@ from src.storage import VisionStorage
 # Change this to "CIFAR", "LOCAL", or "S3" in future
 MODE = "CIFAR"
 
+CIFAR_LABELS = [
+    "airplane", "automobile", "bird", "cat", "deer", 
+    "dog", "frog", "horse", "ship", "truck"
+]
 
 def run_vision_query(limit: int = None):
     storage = VisionStorage()
@@ -33,6 +37,7 @@ def run_vision_query(limit: int = None):
     for source in sources:
         if limit and count >= limit:
             break
+
         print("🎬 Processing: {source.uri}")
 
         # Local Mac extraction
@@ -41,6 +46,15 @@ def run_vision_query(limit: int = None):
         if frame is None:
             print("⚠️ Skipping {source.uri}: No frame extracted.")
             continue
+
+
+        label_info = ""
+        if MODE == "CIFAR" and hasattr(source, 'label'):
+            # source.label is an integer (0-9)
+            friendly_name = CIFAR_LABELS[source.label]
+            label_info = f" [GT Label: {friendly_name}]"
+
+        
 
         # Convert numpy frame to bytes for transmission
         img = Image.fromarray(frame)
@@ -54,6 +68,7 @@ def run_vision_query(limit: int = None):
         try:
             caption, embedding = vlm.describe_image.remote(buf.getvalue())
             print(f"🤖 Moondream says: {caption}\n")
+            print(f"🏷️  Actual: {friendly_name if MODE == 'CIFAR' else 'N/A'}")
 
             storage.save_result(str(source.uri), caption, embedding)
             print("💾 Successfully indexed in database.\n")

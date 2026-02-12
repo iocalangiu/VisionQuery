@@ -50,7 +50,9 @@ def load_image_pixels(source: MediaSource) -> Optional[np.ndarray]:
 
             # Example: uri could be the index of the image in the dataset
             ds = load_dataset("cifar10", split="train")
-            img = ds[int(source.uri)]["img"].convert("RGB")
+            example = ds[int(source.uri)]
+            img = example["img"].convert("RGB")
+            source.label = example['label']
             return np.array(img)
     except Exception:
         print("❌ Error loading image {source.uri}: {e}")

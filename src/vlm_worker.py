@@ -41,9 +41,9 @@ class MoondreamWorker:
 
     @modal.method()
     def describe_image(
-        self,
-        image_bytes: bytes,
-        prompt: str = "Describe this scene strictly in the format: Subject, Action, Context. Do not use full sentences.",
+        self, image_bytes: bytes, prompt: str = ("Describe this scene strictly in the format: Subject, Action, Context. "
+                                                 "Example: 'A golden retriever, running, through a sunlit park.' "
+                                                 "Do not use full sentences or extra words.")
     ):
         from PIL import Image
 
@@ -66,7 +66,7 @@ class MoondreamWorker:
 @app.local_entrypoint()
 def main():
     """
-    This runs on your 2016 Mac when you type 'modal run src/vlm_worker.py'
+    This runs locally when you type 'modal deploy src/vlm_worker.py'
     """
     from src.ingestion import extract_random_frame
     from src.schema import VideoSource
