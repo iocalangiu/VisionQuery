@@ -23,7 +23,7 @@ CIFAR_LABELS = [
 ]
 
 
-def run_vision_query(limit: int = None):
+def run_vision_query(mode: str = "CIFAR", limit: int = None):
     storage = VisionStorage()
 
     # 1. Look up the deployed Moondream worker
@@ -35,11 +35,11 @@ def run_vision_query(limit: int = None):
         return
 
     # 1. Strategy Picker (No commenting out!)
-    if MODE == "CIFAR":
+    if mode == "CIFAR":
         sources = get_cifar_sources(num=10)
-    elif MODE == "LOCAL":
+    elif mode == "LOCAL":
         sources = get_video_sources(local_dir="videos/videos_v0")
-    elif MODE == "S3":
+    elif mode == "S3":
         print("❌ Not implemented yet")
 
     count = 0
@@ -62,7 +62,7 @@ def run_vision_query(limit: int = None):
 
         # Convert numpy frame to bytes for transmission
         img = Image.fromarray(frame)
-        if MODE == "CIFAR":
+        if mode == "CIFAR":
             # Upscale tiny images so the AI can actually see them!
             img = img.resize((224, 224), Image.Resampling.LANCZOS)
         buf = BytesIO()
@@ -72,7 +72,7 @@ def run_vision_query(limit: int = None):
         try:
             caption, embedding = vlm.describe_image.remote(buf.getvalue())
             print(f"🤖 Moondream says: {caption}\n")
-            print(f"🏷️  Actual: {friendly_name if MODE == 'CIFAR' else 'N/A'}")
+            print(f"🏷️  Actual: {friendly_name if mode == 'CIFAR' else 'N/A'}")
 
             storage.save_result(str(source.uri), caption, embedding)
             print("💾 Successfully indexed in database.\n")
