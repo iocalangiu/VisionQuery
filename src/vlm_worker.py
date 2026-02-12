@@ -41,9 +41,13 @@ class MoondreamWorker:
 
     @modal.method()
     def describe_image(
-        self, image_bytes: bytes, prompt: str = ("Describe this scene strictly in the format: Subject, Action, Context. "
-                                                 "Example: 'A golden retriever, running, through a sunlit park.' "
-                                                 "Do not use full sentences or extra words.")
+        self,
+        image_bytes: bytes,
+        prompt: str = (
+            "Describe this scene strictly in the format: Subject, Action, Context. "
+            "Example: 'A golden retriever, running, through a sunlit park.' "
+            "Do not use full sentences or extra words."
+        ),
     ):
         from PIL import Image
 

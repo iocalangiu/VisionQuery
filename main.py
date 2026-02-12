@@ -10,9 +10,18 @@ from src.storage import VisionStorage
 MODE = "LOCAL"
 
 CIFAR_LABELS = [
-    "airplane", "automobile", "bird", "cat", "deer", 
-    "dog", "frog", "horse", "ship", "truck"
+    "airplane",
+    "automobile",
+    "bird",
+    "cat",
+    "deer",
+    "dog",
+    "frog",
+    "horse",
+    "ship",
+    "truck",
 ]
+
 
 def run_vision_query(limit: int = None):
     storage = VisionStorage()
@@ -47,11 +56,9 @@ def run_vision_query(limit: int = None):
             print("⚠️ Skipping {source.uri}: No frame extracted.")
             continue
 
-
-        if MODE == "CIFAR" and hasattr(source, 'label'):
+        if MODE == "CIFAR" and hasattr(source, "label"):
             # source.label is an integer (0-9)
             friendly_name = CIFAR_LABELS[source.label]
-        
 
         # Convert numpy frame to bytes for transmission
         img = Image.fromarray(frame)
