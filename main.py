@@ -48,12 +48,9 @@ def run_vision_query(limit: int = None):
             continue
 
 
-        label_info = ""
         if MODE == "CIFAR" and hasattr(source, 'label'):
             # source.label is an integer (0-9)
             friendly_name = CIFAR_LABELS[source.label]
-            label_info = f" [GT Label: {friendly_name}]"
-
         
 
         # Convert numpy frame to bytes for transmission
