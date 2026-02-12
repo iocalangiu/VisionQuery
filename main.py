@@ -7,7 +7,7 @@ from src.storage import VisionStorage
 
 # --- CONFIGURATION ---
 # Change this to "CIFAR", "LOCAL", or "S3" in future
-MODE = "CIFAR"
+MODE = "LOCAL"
 
 CIFAR_LABELS = [
     "airplane", "automobile", "bird", "cat", "deer", 
@@ -29,7 +29,7 @@ def run_vision_query(limit: int = None):
     if MODE == "CIFAR":
         sources = get_cifar_sources(num=10)
     elif MODE == "LOCAL":
-        sources = get_video_sources(path="videos/videos_v0")
+        sources = get_video_sources(local_dir="videos/videos_v0")
     elif MODE == "S3":
         print("❌ Not implemented yet")
 
