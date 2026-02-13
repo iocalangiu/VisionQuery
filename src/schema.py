@@ -6,5 +6,5 @@ from pathlib import Path
 class MediaSource(BaseModel):
     uri: Union[HttpUrl, Path, str]
     media_type: Literal["video", "image"]
-    source_type: Literal["local", "cifar"]
-    label: Optional[int] = None
+    source_type: Literal["local", "cifar", "food101"]
+    label: Optional[Union[int, str]] = None

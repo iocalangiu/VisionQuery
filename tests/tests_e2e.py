@@ -20,7 +20,7 @@ def setup_local_data():
 
 
 @patch("modal.Cls.from_name")
-@pytest.mark.parametrize("mode", ["CIFAR", "LOCAL"])
+@pytest.mark.parametrize("mode", ["CIFAR", "LOCAL", "FOOD101"])
 def test_pipeline_execution(mock_modal_cls, mode, setup_local_data):
     """
     Test that the main loop executes without crashing.
