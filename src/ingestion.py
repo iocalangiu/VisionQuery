@@ -56,18 +56,19 @@ def load_image_pixels(source: MediaSource) -> Optional[np.ndarray]:
             return np.array(img)
         elif source.source_type == "food101":
             from datasets import load_dataset
+
             # We use streaming=True to avoid downloading 5GB at once
             ds = load_dataset("ethz/food101", split="train", streaming=True)
-            
+
             # Since it's a stream, we skip to the specific index
-            # This is efficient for small 'num', but for large evals, 
+            # This is efficient for small 'num', but for large evals,
             # we'd usually iterate the stream directly.
             for i, example in enumerate(ds):
                 if i == int(source.uri):
                     # Convert integer label to string (e.g., 0 -> 'apple_pie')
-                    label_names = ds.features['label'].names
-                    source.label = label_names[example['label']].replace("_", " ")
-                    
+                    label_names = ds.features["label"].names
+                    source.label = label_names[example["label"]].replace("_", " ")
+
                     return np.array(example["image"].convert("RGB"))
     except Exception:
         print("❌ Error loading image {source.uri}: {e}")

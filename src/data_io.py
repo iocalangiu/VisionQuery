@@ -37,7 +37,7 @@ def get_video_sources(
             if file_path.suffix.lower() in valid_extensions:
                 yield MediaSource(
                     uri=file_path,
-                    media_type="video",  
+                    media_type="video",
                     source_type="local",
                     label=None,
                 )
@@ -53,14 +53,16 @@ def get_cifar_sources(num: int = 10) -> List[MediaSource]:
         for i in range(num)
     ]
 
+
 def get_food_sources(num: int = 10) -> List[MediaSource]:
     """
     Creates a list of MediaSource objects pointing to Food101 indices.
     """
     return [
-        MediaSource(uri=str(i),media_type="image",source_type="food101")
+        MediaSource(uri=str(i), media_type="image", source_type="food101")
         for i in range(num)
     ]
+
 
 # --- Usage Example ---
 if __name__ == "__main__":

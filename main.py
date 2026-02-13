@@ -7,7 +7,7 @@ from src.storage import VisionStorage
 
 # --- CONFIGURATION ---
 # Change this to "CIFAR", "FOOD101","LOCAL", or "S3" in future
-#MODE = "LOCAL"
+# MODE = "LOCAL"
 
 CIFAR_LABELS = [
     "airplane",
@@ -77,7 +77,9 @@ def run_vision_query(mode: str = "CIFAR", limit: int = None):
         try:
             caption, embedding = vlm.describe_image.remote(buf.getvalue())
             print(f"🤖 Moondream says: {caption}\n")
-            print(f"🏷️  Actual: {friendly_name if (mode == 'CIFAR' or mode == 'FOOD101') else 'N/A'}")
+            print(
+                f"🏷️  Actual: {friendly_name if (mode == 'CIFAR' or mode == 'FOOD101') else 'N/A'}"
+            )
 
             storage.save_result(str(source.uri), caption, embedding)
             print("💾 Successfully indexed in database.\n")
