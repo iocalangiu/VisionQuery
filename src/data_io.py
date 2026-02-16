@@ -3,7 +3,7 @@ import os
 from pathlib import Path
 from typing import Generator, List
 from src.schema import MediaSource
-
+import random
 
 def get_video_sources(
     json_path: str | None = None, local_dir: str | None = None
@@ -58,9 +58,11 @@ def get_food_sources(num: int = 10) -> List[MediaSource]:
     """
     Creates a list of MediaSource objects pointing to Food101 indices.
     """
+    random_indices = random.sample(range(101000), num)
+
     return [
         MediaSource(uri=str(i), media_type="image", source_type="food101")
-        for i in range(num)
+        for i in random_indices
     ]
 
 
