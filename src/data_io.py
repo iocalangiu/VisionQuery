@@ -5,6 +5,7 @@ from typing import Generator, List
 from src.schema import MediaSource
 import random
 
+
 def get_video_sources(
     json_path: str | None = None, local_dir: str | None = None
 ) -> Generator[MediaSource, None, None]:
