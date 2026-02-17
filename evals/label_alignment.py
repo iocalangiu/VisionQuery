@@ -7,16 +7,15 @@ from scipy.spatial.distance import cosine
 import modal
 from io import BytesIO
 from PIL import Image, ImageFile
-# Assuming AlignmentEvaluator, get_food_sources, and get_pixels_from_source are imported
+
+from src.data_io import get_food_sources
+from src.ingestion import get_pixels_from_source
 
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 # Add project root to path
 sys.path.append(str(Path(__file__).parent.parent))
 
-from main import run_vision_query
-from src.data_io import get_food_sources
-from src.ingestion import get_pixels_from_source
 
 class AlignmentEvaluator:
     def __init__(self, method="word2vec"):
