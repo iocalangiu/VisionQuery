@@ -24,13 +24,13 @@ def setup_local_data():
 def test_pipeline_execution(mock_modal_cls, mode, setup_local_data):
     # 1. Mock the VLM Worker instance
     mock_worker_instance = MagicMock()
-    
+
     # 2. Mock the .map() method specifically!
     # It needs to return a LIST of tuples because .map() handles batches.
     mock_worker_instance.describe_image.map.return_value = [
         ("A test image", [0.1] * 384)
     ]
-    
+
     # 3. Handle the Modal Cls lookup
     # modal.Cls.from_name(...)() returns the instance
     mock_modal_cls.return_value = lambda: mock_worker_instance

@@ -6,14 +6,16 @@ from src.ingestion import get_pixels_from_source
 from src.storage import VisionStorage
 from itertools import islice
 
+
 # Helper to chunk any generator
 def chunk_iterable(iterable, size):
     it = iter(iterable)
     while True:
         chunk = list(islice(it, size))
-        if not chunk: 
+        if not chunk:
             break
         yield chunk
+
 
 # --- CONFIGURATION ---
 # Change this to "CIFAR", "FOOD101","LOCAL", or "S3" in future
@@ -57,20 +59,19 @@ def run_vision_query(mode: str = "CIFAR", limit: int = 20, batch_size: int = 8):
     count = 0
     for batch in chunk_iterable(sources, batch_size):
         if limit and count >= limit:
-                break
-        
+            break
+
         payloads = []
         metadata = []
 
         for source in batch:
-            
             if limit and count >= limit:
                 break
             print(f"🎬 Processing: {source.uri}")
 
             # Local Mac extraction
             frame = get_pixels_from_source(source)
-            if frame is None: 
+            if frame is None:
                 print("⚠️ Skipping {source.uri}: No frame extracted.")
                 continue
 
@@ -82,8 +83,7 @@ def run_vision_query(mode: str = "CIFAR", limit: int = 20, batch_size: int = 8):
             buf = BytesIO()
             img.save(buf, format="PNG")  # Moondream likes PNG/JPEG
 
-
-            label = 'N/A'
+            label = "N/A"
 
             if mode == "CIFAR" and hasattr(source, "label"):
                 # source.label is an integer (0-9)
@@ -91,7 +91,7 @@ def run_vision_query(mode: str = "CIFAR", limit: int = 20, batch_size: int = 8):
             elif mode == "FOOD101" and hasattr(source, "label"):
                 label = source.label
 
-            count+=1
+            count += 1
             payloads.append(buf.getvalue())
             metadata.append({"uri": str(source.uri), "label": label})
         if not payloads:
@@ -105,9 +105,8 @@ def run_vision_query(mode: str = "CIFAR", limit: int = 20, batch_size: int = 8):
             if i < len(metadata):
                 m = metadata[i]
                 print(f"🤖 [{m['label']}] -> {caption[:50]}...")
-                storage.save_result(m['uri'], caption, embedding)
+                storage.save_result(m["uri"], caption, embedding)
 
-        
 
 if __name__ == "__main__":
     run_vision_query()
