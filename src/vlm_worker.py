@@ -1,5 +1,7 @@
 import modal
 import io
+import torch
+
 
 app = modal.App("vision-query-moondream")
 
@@ -14,7 +16,14 @@ vlm_image = modal.Image.debian_slim().pip_install(
 )
 
 
-@app.cls(image=vlm_image, gpu="T4")
+@app.cls(
+    image=vlm_image, 
+    gpu="T4",
+    container_idle_timeout=300,  # Keeps GPU warm for 5 mins to handle next batch
+    concurrency_limit=5,         # Limits total containers to save money
+    allow_concurrent_inputs=4    # CRITICAL: Allows 1 GPU to process 4 images in parallel threads
+)
+
 class MoondreamWorker:
     @modal.enter()
     def setup(self):
@@ -53,10 +62,9 @@ class MoondreamWorker:
 
         img = Image.open(io.BytesIO(image_bytes))
 
-        # Moondream specific inference style
-        enc_image = self.model.encode_image(img)
-        answer = self.model.answer_question(enc_image, prompt, self.tokenizer)
-
+        with torch.inference_mode():
+            enc_image = self.model.encode_image(img)
+            answer = self.model.answer_question(enc_image, prompt, self.tokenizer)
         embedding = self.encoder.encode(answer).tolist()
         return answer, embedding
 

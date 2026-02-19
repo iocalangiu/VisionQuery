@@ -4,6 +4,15 @@ from PIL import Image
 from src.data_io import get_video_sources, get_cifar_sources, get_food_sources
 from src.ingestion import get_pixels_from_source
 from src.storage import VisionStorage
+from itertools import islice
+
+# Helper to chunk any generator
+def chunk_iterable(iterable, size):
+    it = iter(iterable)
+    while True:
+        chunk = list(islice(it, size))
+        if not chunk: break
+        yield chunk
 
 # --- CONFIGURATION ---
 # Change this to "CIFAR", "FOOD101","LOCAL", or "S3" in future
@@ -23,7 +32,7 @@ CIFAR_LABELS = [
 ]
 
 
-def run_vision_query(mode: str = "CIFAR", limit: int = None):
+def run_vision_query(mode: str = "CIFAR", limit: int = 20, batch_size: int = 8):
     storage = VisionStorage()
 
     # 1. Look up the deployed Moondream worker
@@ -45,48 +54,59 @@ def run_vision_query(mode: str = "CIFAR", limit: int = None):
         print("❌ Not implemented yet")
 
     count = 0
-    for source in sources:
+    for batch in chunk_iterable(sources, batch_size):
         if limit and count >= limit:
-            break
+                break
+        
+        payloads = []
+        metadata = []
 
-        print("🎬 Processing: {source.uri}")
+        for source in batch:
+            
+            if limit and count >= limit:
+                break
+            print(f"🎬 Processing: {source.uri}")
 
-        # Local Mac extraction
-        frame = get_pixels_from_source(source)
-        # frame = extract_random_frame(source)
-        if frame is None:
-            print("⚠️ Skipping {source.uri}: No frame extracted.")
+            # Local Mac extraction
+            frame = get_pixels_from_source(source)
+            if frame is None: 
+                print("⚠️ Skipping {source.uri}: No frame extracted.")
+                continue
+
+            img = Image.fromarray(frame)
+            if mode == "CIFAR" or img.width < 224:
+                # Upscale tiny images so the AI can actually see them!
+                img = img.resize((224, 224), Image.Resampling.LANCZOS)
+
+            buf = BytesIO()
+            img.save(buf, format="PNG")  # Moondream likes PNG/JPEG
+
+
+            label = 'N/A'
+
+            if mode == "CIFAR" and hasattr(source, "label"):
+                # source.label is an integer (0-9)
+                label = CIFAR_LABELS[source.label]
+            elif mode == "FOOD101" and hasattr(source, "label"):
+                label = source.label
+
+            count+=1
+            payloads.append(buf.getvalue())
+            metadata.append({"uri": str(source.uri), "label": label})
+        if not payloads:
             continue
 
-        if mode == "CIFAR" and hasattr(source, "label"):
-            # source.label is an integer (0-9)
-            friendly_name = CIFAR_LABELS[source.label]
+        print(f"Sending batch of {len(payloads)} to Modal...")
+        results = list(vlm.describe_image.map(payloads))
 
-        if mode == "FOOD101" and hasattr(source, "label"):
-            friendly_name = source.label
+        # Storage
+        for i, (caption, embedding) in enumerate(results):
+            if i < len(metadata):
+                m = metadata[i]
+                print(f"🤖 [{m['label']}] -> {caption[:50]}...")
+                storage.save_result(m['uri'], caption, embedding)
 
-        # Convert numpy frame to bytes for transmission
-        img = Image.fromarray(frame)
-        if mode == "CIFAR" or img.width < 224:
-            # Upscale tiny images so the AI can actually see them!
-            img = img.resize((224, 224), Image.Resampling.LANCZOS)
-        buf = BytesIO()
-        img.save(buf, format="PNG")  # Moondream likes PNG/JPEG
-
-        print("☁️ Calling Moondream2 on Modal...")
-        try:
-            caption, embedding = vlm.describe_image.remote(buf.getvalue())
-            print(f"🤖 Moondream says: {caption}\n")
-            print(
-                f"🏷️  Actual: {friendly_name if (mode == 'CIFAR' or mode == 'FOOD101') else 'N/A'}"
-            )
-
-            storage.save_result(str(source.uri), caption, embedding)
-            print("💾 Successfully indexed in database.\n")
-            count += 1
-        except Exception as e:
-            print(f"❌ Error during VLM inference for {source.uri}: {e}")
-
+        
 
 if __name__ == "__main__":
     run_vision_query()

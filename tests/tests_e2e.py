@@ -22,19 +22,21 @@ def setup_local_data():
 @patch("modal.Cls.from_name")
 @pytest.mark.parametrize("mode", ["CIFAR", "LOCAL", "FOOD101"])
 def test_pipeline_execution(mock_modal_cls, mode, setup_local_data):
-    """
-    Test that the main loop executes without crashing.
-    We mock the Modal part so we don't need a GPU/Secrets to run this.
-    """
-    # 1. Mock the VLM Worker's response
-    mock_worker = MagicMock()
-    mock_worker.describe_image.remote.return_value = ("A test image", [0.1] * 384)
-    mock_modal_cls.return_value = lambda: mock_worker
+    # 1. Mock the VLM Worker instance
+    mock_worker_instance = MagicMock()
+    
+    # 2. Mock the .map() method specifically!
+    # It needs to return a LIST of tuples because .map() handles batches.
+    mock_worker_instance.describe_image.map.return_value = [
+        ("A test image", [0.1] * 384)
+    ]
+    
+    # 3. Handle the Modal Cls lookup
+    # modal.Cls.from_name(...)() returns the instance
+    mock_modal_cls.return_value = lambda: mock_worker_instance
 
-    # 2. Run the query logic (maybe point to a 'test_data' folder)
     try:
-        # You might want to modify run_vision_query to accept a 'limit'
-        # so it only processes 1 item for the test.
-        run_vision_query(mode=mode, limit=1)
+        # Pass a small limit to keep the test fast
+        run_vision_query(mode=mode, limit=1, batch_size=1)
     except Exception as e:
         pytest.fail(f"Pipeline crashed in {mode} mode with error: {e}")
