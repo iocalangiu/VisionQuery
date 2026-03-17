@@ -22,6 +22,26 @@ class VisionStorage:
             ]
         )
 
+    def build_index(self, num_partitions: int = 8, num_sub_vectors: int = 16):
+        """Builds an IVF-PQ ANN index on the vector column for fast semantic search.
+
+        num_partitions: number of clusters (higher = faster search, needs more data)
+        num_sub_vectors: PQ compression chunks (must divide embedding dim 384 evenly)
+        Requires at least 256 * num_partitions rows.
+        """
+        if self.table_name not in self.db.table_names():
+            print("❌ No table found. Run the pipeline first.")
+            return
+        tbl = self.db.open_table(self.table_name)
+        row_count = len(tbl.to_pandas())
+        min_rows = 256 * num_partitions
+        if row_count < min_rows:
+            print(f"❌ Need at least {min_rows} rows for num_partitions={num_partitions}, have {row_count}.")
+            return
+        print(f"Building IVF-PQ index on {row_count} vectors...")
+        tbl.create_index(num_partitions=num_partitions, num_sub_vectors=num_sub_vectors)
+        print("✅ Index built.")
+
     def save_result(self, video_uri: str, caption: str, embedding: list):
         """Saves a single entry to the database."""
         data = [
