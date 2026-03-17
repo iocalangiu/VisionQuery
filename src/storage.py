@@ -36,7 +36,9 @@ class VisionStorage:
         row_count = len(tbl.to_pandas())
         min_rows = 256 * num_partitions
         if row_count < min_rows:
-            print(f"❌ Need at least {min_rows} rows for num_partitions={num_partitions}, have {row_count}.")
+            print(
+                f"❌ Need at least {min_rows} rows for num_partitions={num_partitions}, have {row_count}."
+            )
             return
         print(f"Building IVF-PQ index on {row_count} vectors...")
         tbl.create_index(num_partitions=num_partitions, num_sub_vectors=num_sub_vectors)
